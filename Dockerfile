@@ -166,8 +166,6 @@ RUN OPENRESTY="1.13.6.2" && ZLIB="zlib-1.2.11" && PCRE="pcre-8.41" &&  openresty
     make && make install && mv /usr/local/nginx/nginx /usr/local/bin
 
 
-
-
 # Boringssl build section
 # If you want to use the openssl instead of boringssl
 # RUN apt-get update -y && apt-get install -y libssl-dev
@@ -289,6 +287,18 @@ RUN cd / && git clone https://github.com/meetecho/janus-gateway.git && cd /janus
     --enable-plugin-nosip \
     --enable-all-handlers && \
     make && make install && make configs && ldconfig
+
+
+RUN cd / && curl https://sh.rustup.rs -sSf > rustup.sh \
+    && sh rustup.sh -y \
+    && . ~/.cargo/env \
+    && rm rustup.sh \
+    && git clone https://github.com/mquander/janus-plugin-sfu \
+    && cd /janus-plugin-sfu \
+    && cargo build --release \
+    && mkdir -p /opt/janus/lib/janus/plugins \
+    && cp target/release/libjanus_plugin_sfu.so /usr/local/lib/janus/plugins/ \
+    && cp janus.plugin.sfu.cfg.example /usr/local/etc/janus/janus.plugin.sfu.cfg
 
 COPY nginx.conf /usr/local/nginx/nginx.conf
 
